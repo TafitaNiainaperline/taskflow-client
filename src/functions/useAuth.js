@@ -48,12 +48,15 @@ export const useAuth = () => {
         email,
         password,
       })
+      console.log('Login response:', response.data)
       localStorage.setItem('accessToken', response.data.accessToken)
       localStorage.setItem('refreshToken', response.data.refreshToken)
       setUser(response.data.user)
       setIsAuthenticated(true)
+      console.log('Auth state updated:', { token: response.data.accessToken, authenticated: true })
       return response.data
     } catch (error) {
+      console.error('Login error:', error)
       throw error.response?.data || error
     }
   }
