@@ -1,24 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../functions/useAuth'
+import { useAuth } from '../context/AuthContext'
 import eyeOffIcon from '../images/eye-off-svgrepo-com.svg'
 import '../styles/auth.scss'
 
 function Register() {
   const navigate = useNavigate()
-  const { register, isAuthenticated } = useAuth()
+  const { register } = useAuth()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard')
-    }
-  }, [isAuthenticated, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,6 +21,7 @@ function Register() {
 
     try {
       await register(email, password, name)
+      navigate('/dashboard')
     } catch (err) {
       setError(err.error || 'Registration failed')
       setLoading(false)

@@ -1,23 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../functions/useAuth'
+import { useAuth } from '../context/AuthContext'
 import eyeOffIcon from '../images/eye-off-svgrepo-com.svg'
 import '../styles/auth.scss'
 
 function Login() {
   const navigate = useNavigate()
-  const { login, isAuthenticated } = useAuth()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard')
-    }
-  }, [isAuthenticated, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -26,6 +20,7 @@ function Login() {
 
     try {
       await login(email, password)
+      navigate('/dashboard')
     } catch (err) {
       setError(err.error || 'Login failed')
       setLoading(false)
