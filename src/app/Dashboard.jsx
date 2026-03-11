@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { useAuth } from '../functions/useAuth'
+import { useAuth } from '../context/AuthContext'
 import '../styles/dashboard.scss'
 
 function Dashboard() {
@@ -11,7 +11,9 @@ function Dashboard() {
   const [boards, setBoards] = useState([])
   const [loading, setLoading] = useState(true)
   const [newBoardName, setNewBoardName] = useState('')
+  const [newTeamName, setNewTeamName] = useState('')
   const [selectedTeam, setSelectedTeam] = useState(null)
+  const [showTeamModal, setShowTeamModal] = useState(false)
 
   useEffect(() => {
     fetchTeams()
@@ -27,7 +29,7 @@ function Dashboard() {
     try {
       const response = await api.get('/teams')
       setTeams(response.data)
-      if (response.data.length > 0) {
+      if (response.data.length > 0 && !selectedTeam) {
         setSelectedTeam(response.data[0].id)
       }
     } catch (error) {
@@ -43,6 +45,20 @@ function Dashboard() {
       setBoards(response.data)
     } catch (error) {
       console.error('Failed to fetch boards:', error)
+    }
+  }
+
+  const handleCreateTeam = async (e) => {
+    e.preventDefault()
+    if (!newTeamName.trim()) return
+
+    try {
+      await api.post('/teams', { name: newTeamName })
+      setNewTeamName('')
+      setShowTeamModal(false)
+      fetchTeams()
+    } catch (error) {
+      console.error('Failed to create team:', error)
     }
   }
 
@@ -86,7 +102,16 @@ function Dashboard() {
       <div className="container">
         <div className="dashboard-content">
           <aside className="sidebar">
-            <h3>Teams</h3>
+            <div className="sidebar-header">
+              <h3>Teams</h3>
+              <button
+                className="primary-icon"
+                onClick={() => setShowTeamModal(true)}
+                title="Create new team"
+              >
+                +
+              </button>
+            </div>
             <ul className="teams-list">
               {teams.map((team) => (
                 <li
@@ -135,6 +160,35 @@ function Dashboard() {
           </main>
         </div>
       </div>
+
+      {showTeamModal && (
+        <div className="modal-overlay" onClick={() => setShowTeamModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Create New Team</h2>
+            <form onSubmit={handleCreateTeam}>
+              <input
+                type="text"
+                placeholder="Team name..."
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+                autoFocus
+              />
+              <div className="modal-actions">
+                <button type="submit" className="primary">
+                  Create
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setShowTeamModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
