@@ -1,26 +1,39 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { useSocket, useSocketEvent, useSocketEmit } from '../functions/useSocket'
+import { useSocket, useSocketEvent } from '../functions/useSocket'
+import BoardColumn from '../components/BoardColumn'
 import '../styles/board.scss'
 
 function Board() {
   const { id } = useParams()
   const navigate = useNavigate()
   const socket = useSocket()
-  const emit = useSocketEmit(socket)
   const [board, setBoard] = useState(null)
   const [columns, setColumns] = useState([])
   const [loading, setLoading] = useState(true)
   const [newColumnName, setNewColumnName] = useState('')
+  const [teamMembers, setTeamMembers] = useState([])
 
   useEffect(() => {
     fetchBoard()
   }, [id])
 
+  const fetchTeamMembers = async (teamId) => {
+    try {
+      if (teamId) {
+        const response = await api.get(`/teams/${teamId}`)
+        const members = response.data.members?.map(m => m.user) || []
+        setTeamMembers(members)
+      }
+    } catch (error) {
+      console.error('Failed to fetch team members:', error)
+    }
+  }
+
   useEffect(() => {
     if (socket && id) {
-      emit('join:board', parseInt(id))
+      socket.emit('join:board', parseInt(id))
     }
   }, [socket, id])
 
@@ -41,6 +54,9 @@ function Board() {
       const response = await api.get(`/boards/${id}`)
       setBoard(response.data)
       setColumns(response.data.columns || [])
+      if (response.data.teamId) {
+        fetchTeamMembers(response.data.teamId)
+      }
     } catch (error) {
       console.error('Failed to fetch board:', error)
     } finally {
@@ -68,13 +84,12 @@ function Board() {
     if (!taskTitle.trim()) return
 
     try {
-      const response = await api.post('/tasks', {
+      await api.post('/tasks', {
         title: taskTitle,
         columnId,
       })
-      emit('task:created', {
+      socket?.emit('task:created', {
         boardId: parseInt(id),
-        task: response.data,
       })
       fetchBoard()
     } catch (error) {
@@ -122,44 +137,12 @@ function Board() {
                 column={column}
                 onCreateTask={handleCreateTask}
                 boardId={parseInt(id)}
+                teamMembers={teamMembers}
+                onTaskUpdate={fetchBoard}
               />
             ))
           )}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function BoardColumn({ column, onCreateTask, boardId }) {
-  const [newTaskName, setNewTaskName] = useState('')
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onCreateTask(column.id, newTaskName)
-    setNewTaskName('')
-  }
-
-  return (
-    <div className="column">
-      <h3>{column.title}</h3>
-      <form onSubmit={handleSubmit} className="create-task-form">
-        <input
-          type="text"
-          placeholder="New task..."
-          value={newTaskName}
-          onChange={(e) => setNewTaskName(e.target.value)}
-        />
-        <button type="submit" className="secondary">
-          Add
-        </button>
-      </form>
-      <div className="tasks-list">
-        {column.tasks?.map((task) => (
-          <div key={task.id} className="task-card">
-            <p>{task.title}</p>
-          </div>
-        ))}
       </div>
     </div>
   )
