@@ -1,0 +1,39 @@
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  // Variants
+  &.card-default {
+    background: white;
+  }
+
+  &.card-elevated {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &.card-outline {
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: none;
+
+    &:hover {
+      border-color: var(--primary);
+    }
+  }
+
+  &.card-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+}
