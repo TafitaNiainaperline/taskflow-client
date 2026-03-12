@@ -5,8 +5,8 @@
 }
 
 :root {
-  --primary: #3498db;
-  --secondary: #2ecc71;
+  --primary: #808080;
+  --secondary: #808080;
   --danger: #e74c3c;
   --dark: #2c3e50;
   --light: #ecf0f1;
@@ -44,7 +44,7 @@ button.primary {
   color: white;
 
   &:hover {
-    background-color: #2980b9;
+    background-color: #6a6a6a;
   }
 }
 
@@ -53,7 +53,7 @@ button.secondary {
   color: white;
 
   &:hover {
-    background-color: #27ae60;
+    background-color: #6a6a6a;
   }
 }
 
